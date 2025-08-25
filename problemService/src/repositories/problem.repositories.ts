@@ -39,10 +39,6 @@ export async function deleteProblem(problemId:string){
 }
 
 export async function updateProblem(problemId:string,updateData:any){
-
-
-  
-    
     const updatedProblem = await problem.findByIdAndUpdate(
         problemId,
         updateData,
@@ -52,4 +48,18 @@ export async function updateProblem(problemId:string,updateData:any){
     )
     logger.info(`updated problem is: ${updatedProblem}`);
     return updatedProblem;
+}
+
+export async function findByDifficulty(difficulty:string) {
+    const foundProblem = await problem.find({difficulty}).sort({createdAt:-1});
+    logger.info("the problem is :", foundProblem);
+    return foundProblem;;
+}
+
+export async function searchProblem(query:string) {
+    const regex = new RegExp(query,"i");
+    const foundProblem = await problem.find({$or:[{title:regex},{descripition:regex}]}).sort({createdAt:-1})
+    logger.info("the problem is",foundProblem);
+    return foundProblem;
+
 }

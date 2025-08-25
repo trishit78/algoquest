@@ -8,40 +8,75 @@ export interface ITestcases extends Document{
 
 export interface IProblem extends Document{
     title:string,
-    difficulty:string,
     description:string,
+    difficulty:"easy" | "medium" | "hard",
     testcases:ITestcases[],
+    editorial?:string,
     createdAt:string,
     updatedAt:string
 }
 
 
+const testSchema = new mongoose.Schema<ITestcases>({
+    input:{
+        type:String,
+        required:[true,"Input is required"],
+        trim:true
+    },
+    output:{
+        type:String,
+        required:[true,"Output is required"],
+        trim:true
+    }
+},{
+    //_id:false      -> if we dont want the _id for each input and output
+})
+
+
 const problemSchema = new mongoose.Schema<IProblem>({
     title:{
         type:String,
-        required:[true,'Title is req']
+        required:[true,'Title is req'],
+        trim:true
     },
     description:{
         type:String,
-        required:[true,'description is req']
+        required:[true,'description is req'],
+        trim:true
     },
     difficulty:{
         type:String,
-        required:[true,'difficulty is req']
+        enum:{
+            values:["easy","medium","hard"],
+            message:"Invalid difficulty level"
+        },
+        default:"easy",
+        required:[true,"Invalid difficulty level"]
     },
     
-    testcases:[
-        {
-            input:{
-                type:String,
-                required:[true,'input is required']
-            },
-            output:{
-                type:String,
-                required:[true,'output is req']
-            }
-        }
-    ]
+    // testcases:[
+    //     {
+    //         input:{
+    //             type:String,
+    //             required:[true,'input is required']
+    //         },
+    //         output:{
+    //             type:String,
+    //             required:[true,'output is req']
+    //         }
+    //     }
+    // ],
+
+    testcases:[testSchema],
+    editorial:{
+        type:String,
+        trim:true
+    }
 },{timestamps:true})
 
-export const problem = mongoose.model<IProblem>('Problem',problemSchema)
+
+problemSchema.index({ title: 1 }, { unique: true }); // index on title field
+problemSchema.index({ difficulty: 1 }); // index on difficulty field
+
+
+export const problem = mongoose.model<IProblem>('Problem',problemSchema);
