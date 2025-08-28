@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createProblemService, deleteProblemService, getAllProblemsService, getProblemService, updateProblemService } from "../services/problem.service";
+import { createProblemService, deleteProblemService, findByDifficultyService, getAllProblemsService, getProblemService, searchProblemService, updateProblemService } from "../services/problem.service";
 
 export async function createProblemHandler(req:Request, res:Response) {
     // call the service layer
@@ -66,4 +66,23 @@ export async function deleteProblemHandler(req:Request,res:Response){
       data:deleted,
       success: true
     });
+}
+
+export async function findByDifficultyHandler(req:Request,res:Response):Promise<void>{
+    const problems = await findByDifficultyService(req.params.difficulty as "easy" | "medium" | "hard");
+
+    res.status(200).json({
+        message:"Problems fetched successfully",
+        data:problems,
+        success:true
+    })
+}
+
+export async function searchProblemHandler(req:Request,res:Response):Promise<void>{
+    const problems = await searchProblemService(req.query.query as string);
+    res.status(200).json({
+        message:"Problems fetched successfully",
+        data:problems,
+        success:true
+    })
 }

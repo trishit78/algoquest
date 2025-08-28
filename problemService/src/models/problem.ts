@@ -72,7 +72,18 @@ const problemSchema = new mongoose.Schema<IProblem>({
         type:String,
         trim:true
     }
-},{timestamps:true})
+},{
+    timestamps:true,
+    // toJSON:{
+    //     transform:(_,record)=>{
+    //         delete(record as any)._v;
+    //          record.id = record._id;
+    //          delete record._id;
+    //          return record
+    //     }   
+    // }
+
+})
 
 
 problemSchema.index({ title: 1 }, { unique: true }); // index on title field
