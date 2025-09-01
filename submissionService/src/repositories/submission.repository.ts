@@ -1,4 +1,4 @@
-import { ISubmission, Submission, SubmissionStatus } from "../models/submission.model";
+import { ISubmission, ISubmissionData, Submission, SubmissionStatus } from "../models/submission.model";
 
 export async function createSubmission(submissionData:Partial<ISubmission>):Promise<ISubmission> {
     const newSubmission = await Submission.create(submissionData);
@@ -19,7 +19,7 @@ export async function deleteById(id:string):Promise<boolean> {
     const result = await Submission.findByIdAndDelete(id);
     return result !== null;
 }
-export async function updateStatus(id:string,status:SubmissionStatus):Promise<ISubmission | null> {
-    const submission = await Submission.findByIdAndUpdate(id,{status},{new:true});
+export async function updateStatus(id:string,status:SubmissionStatus,submissionData:ISubmissionData):Promise<ISubmission | null> {
+    const submission = await Submission.findByIdAndUpdate(id,{status,submissionData},{new:true});
     return submission;
 }

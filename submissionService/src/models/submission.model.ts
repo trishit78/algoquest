@@ -13,7 +13,10 @@ export enum SubmissionStatus {
     WRONG_ANSWER= "wrong_answer"
 }
 
-
+export interface ISubmissionData {
+    testCaseId: string;
+    status: string;
+}
 export interface ISubmission extends Document{
     _id: any;
     problemId:string,

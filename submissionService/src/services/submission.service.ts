@@ -1,6 +1,6 @@
 import { getProblemById } from "../apis/problem.api";
 import logger from "../config/logger.config";
-import { ISubmission, SubmissionLanguage, SubmissionStatus } from "../models/submission.model";
+import { ISubmission, ISubmissionData, SubmissionLanguage, SubmissionStatus } from "../models/submission.model";
 import { addSubmissionJob } from "../producers/submission.producer";
 import { createSubmission, deleteById, findById, findProblemById, updateStatus } from "../repositories/submission.repository";
 import { BadRequestError, NotFoundError } from "../utils/errors/app.error";
@@ -49,8 +49,6 @@ export async function createSubmissionService(submissionData:Partial<ISubmission
 
 }
 
-
-
 export async function getSubmissionByIdService(id:string):Promise<ISubmission| null> {
     const submission  = await findById(id);
     if(!submission){
@@ -72,8 +70,8 @@ export async function deleteSubmissionByIdService(id:string):Promise<boolean> {
     return result;
 }
 
-export async function updateSubmissionStatusService(id:string,status:SubmissionStatus):Promise<ISubmission | null> {
-    const submission = await updateStatus(id,status);
+export async function updateSubmissionStatusService(id:string,status:SubmissionStatus, submissionData: ISubmissionData):Promise<ISubmission | null> {
+    const submission = await updateStatus(id,status,submissionData);
     if(!submission){
         throw new NotFoundError("Submission not found");
     }
