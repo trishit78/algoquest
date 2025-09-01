@@ -6,18 +6,30 @@ import { createSubmissionSchema, submissionQuerySchema, updateSubmissionStatusSc
 
 const submissionRouter = express.Router();
 
-submissionRouter.post("/",validateRequestBody(createSubmissionSchema),createSubmissionHandler);
 
-submissionRouter.get(
-    '/:id', 
-    getSubmissionByIdHandler
-);
+
+
+submissionRouter.post("/create",validateRequestBody(createSubmissionSchema),createSubmissionHandler);
 
 submissionRouter.get(
     '/problem/:problemId', 
     validateQueryParams(submissionQuerySchema),
     getSubmissionByProblemIdHandler
 );
+submissionRouter.get(
+    '/:id', 
+    getSubmissionByIdHandler
+);
+
+
+submissionRouter.patch(
+    '/:id/status', 
+    validateRequestBody(updateSubmissionStatusSchema),
+    updateSubmissionStatusHandler
+);
+
+
+
 
 
 submissionRouter.delete(
@@ -25,11 +37,9 @@ submissionRouter.delete(
     deleteSubmissionByIdHandler
 );
 
-submissionRouter.patch(
-    '/:id/status', 
-    validateRequestBody(updateSubmissionStatusSchema),
-    updateSubmissionStatusHandler
-);
+
+
+
 
 export default submissionRouter;
 

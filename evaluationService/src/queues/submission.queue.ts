@@ -1,8 +1,9 @@
 import { Queue } from "bullmq";
 import { createNewRedisConnection } from "../config/redis.config";
 import logger from "../config/logger.config";
+import { SUBMISSION_QUEUE } from "../utils/constants";
 
-export const submissionQueue = new Queue("submission",{
+export const submissionQueue = new Queue(SUBMISSION_QUEUE,{
     connection:createNewRedisConnection(),
     defaultJobOptions:{
         attempts:3,
@@ -12,7 +13,6 @@ export const submissionQueue = new Queue("submission",{
         }
     }
 });
-
 
 submissionQueue.on("error",(err)=>{
     logger.error(  `Submission queue error: ${err}`);

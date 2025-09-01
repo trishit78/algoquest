@@ -23,8 +23,7 @@ export async function createSubmissionService(submissionData:Partial<ISubmission
     if(!problem){
         throw new NotFoundError("Problem not found or something went wrong");
     }
-   
-
+    
     //get the problem from the problemService ---> in the apis/problem.api.ts
 
 
