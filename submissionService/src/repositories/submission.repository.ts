@@ -1,7 +1,8 @@
 import { ISubmission, ISubmissionData, Submission, SubmissionStatus } from "../models/submission.model";
 
 export async function createSubmission(submissionData:Partial<ISubmission>):Promise<ISubmission> {
-    const newSubmission = await Submission.insertOne(submissionData);
+    const newSubmission = await Submission.create(submissionData);
+    
     return newSubmission;
 }
 

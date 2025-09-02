@@ -2,6 +2,7 @@ import axios, { AxiosResponse } from "axios";
 
 import { InternalServerError } from "../utils/errors/app.error";
 import logger from "../config/logger.config";
+import { serverConfig } from "../config";
 
 
 
@@ -27,8 +28,8 @@ export interface IProblemResponse{
 export async function getProblemById(problemId:string):Promise<IProblemDetails | null>{
     try {
         const response: AxiosResponse<IProblemResponse>=
-        await axios.get(`{serverConfig.PROBLEM_SERVICE}/problems/${problemId}`);
-console.log(response.data.data)
+        await axios.get(`${serverConfig.PROBLEM_SERVICE}/problems/${problemId}`);
+
         if(response.data.success){
             return response.data.data;
         }

@@ -52,6 +52,5 @@ const submissionSchema = new Schema<ISubmission>({
     timestamps:true,
 });
 
-submissionSchema.index({problemId:1,language:1,status:1},{unique:true});
 
 export const Submission = model<ISubmission>("Submission",submissionSchema); 
