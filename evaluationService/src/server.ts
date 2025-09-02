@@ -7,6 +7,9 @@ import logger from './config/logger.config';
 import { attachCorrelationIdMiddleware } from './middlewares/correlation.middleware';
 import { startWorkers } from './workers/evaluation.worker';
 import { pullALLImages } from './utils/containers/pullImage.util';
+import { createNewDockerContainer } from './utils/containers/createContainer.util';
+import { PYTHON_IMAGE } from './utils/constants';
+//import { Container } from 'dockerode';
 // import { pullImage } from './utils/containers/pullImage.util';
 const app = express();
 
@@ -38,4 +41,14 @@ app.listen(serverConfig.PORT,async () => {
 
      await pullALLImages();
     console.log('image pulled successfully')
+
+
+    const container = await createNewDockerContainer({
+        imageName:PYTHON_IMAGE,
+        cmdExecutable:['/bin/bash', '-c', 'tail -f /var/log/dmesg'],
+        memoryLimit:1024*1024*1024
+    });
+    
+    await container?.start();
+
 });
