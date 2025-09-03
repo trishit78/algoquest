@@ -11,10 +11,10 @@ export interface CreateContainerOptions{
 }
 
 export async function createNewDockerContainer(options:CreateContainerOptions) {
-    console.log('hello')
+    
     try {
         const docker = new Docker();
-        console.log('hello')
+    
         const container = await docker.createContainer({
             Image:options.imageName,
             Cmd:options.cmdExecutable,
