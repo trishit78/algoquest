@@ -21,7 +21,7 @@ export async function createNewDockerContainer(options:CreateContainerOptions) {
             AttachStdin:true,    // to allow stdin
             AttachStdout:true,   // to allow stdout
             AttachStderr:true,    // to allow stderr
-            Tty:false,     // not configuring pseudo terminal inside the terminal
+            Tty:true,     // not configuring pseudo terminal inside the terminal
             OpenStdin:true,  // keep the input stream open even if no input is provided
             HostConfig:{
                 Memory:options.memoryLimit,
