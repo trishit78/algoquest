@@ -7,7 +7,7 @@ import logger from './config/logger.config';
 import { attachCorrelationIdMiddleware } from './middlewares/correlation.middleware';
 import { startWorkers } from './workers/evaluation.worker';
 import { pullALLImages } from './utils/containers/pullImage.util';
-import { runCode } from './utils/containers/pythonRunner';
+import { runCode } from './utils/containers/codeRunner';
 import { CPP_IMAGE } from './utils/constants';
 const app = express();
 
@@ -66,10 +66,11 @@ async function testCppCode() {
     const cppCode = `
     #include <iostream>
     int main() {
-        std::cout << "Hello, Cpp!" << std::endl;
-        for(int i=0;i<10;i++){
-            std::cout << i << std::endl;
-        }
+    int n;
+    std::cin>>n;
+       
+        std::cout<<n*n;
+        
         return 0;
     }
     `;
@@ -78,6 +79,7 @@ async function testCppCode() {
         code:cppCode,
         language:"cpp",
         timeout:5000,
-        imageName:CPP_IMAGE
+        imageName:CPP_IMAGE,
+        input:"5"
     })
 }

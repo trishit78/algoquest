@@ -1,7 +1,9 @@
 //import { PYTHON_IMAGE } from "../constants";
+
 import { InternalServerError } from "../errors/app.error";
 import { commands } from "./commands.utils";
 import { createNewDockerContainer } from "./createContainer.util";
+//import { createNewDockerContainer } from "./createContainer.util";
 
 
 const allowedListedLanguage = ['python','cpp'];
@@ -9,11 +11,12 @@ export interface RunCodeOptions{
     code:string,
     language:"python"| "cpp",
     timeout:number,
-    imageName:string
+    imageName:string,
+    input:string
 }
 
 export async function runCode(options: RunCodeOptions) {
-    const {code,language,timeout,imageName} = options;
+    const {code,language,timeout,imageName,input} = options;
 
     if(!allowedListedLanguage.includes(language)){
         throw new InternalServerError(`Invalid lang`);
@@ -22,7 +25,7 @@ export async function runCode(options: RunCodeOptions) {
 
     const container = await createNewDockerContainer({
         imageName:imageName,
-        cmdExecutable:commands[language](code),
+        cmdExecutable:commands[language](code,input),
         memoryLimit:1024*1024*1024
     });
 
@@ -42,8 +45,15 @@ export async function runCode(options: RunCodeOptions) {
         stdout:true,follow:false
     });
 
-    console.log("Container logs",logs?.toString("utf-8").trim());
+  const containerLogs = processLogs(logs);
+  console.log(containerLogs);
 
+
+    //console.log("Container logs",logs?.toString("utf-8").trim());
+    // const sampleOutput = "625";
+    // console.log("logs string", logsString);
+    // fs.writeFileSync("logs.txt",logsString || '');
+    //console.log("Is matching", containerLogs === sampleOutput)
     await container?.remove();
 
     if(status.StatusCode == 0){
@@ -53,4 +63,13 @@ export async function runCode(options: RunCodeOptions) {
         clearTimeout(tle);
         console.log("Container exited with error");
     }
+}
+
+function processLogs(logs:Buffer |undefined){
+    const logsString = logs?.toString()
+    .replace(/\x00/g, '') // Remove null bytes
+    .replace(/[\x00-\x09\x0B-\x1F\x7F-\x9F]/g, '') // Remove control characters except \n (0x0A)
+    .trim();
+
+    return logsString
 }
