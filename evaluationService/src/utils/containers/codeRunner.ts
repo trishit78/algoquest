@@ -29,16 +29,27 @@ export async function runCode(options: RunCodeOptions) {
         memoryLimit:1024*1024*1024
     });
 
+    let isTimeLimitExceeded = false;
     const tle = setTimeout(()=>{
         console.log("Time limit exceeded");
+        isTimeLimitExceeded = true;
          container?.kill();
     },timeout);
 
-    console.log("Container created successfully", container?.id);
+   // console.log("Container created successfully", container?.id);
 
     await container?.start();
     const status =  await container?.wait();
-    console.log('Container status',status);
+
+    if(isTimeLimitExceeded){
+      await container?.remove()
+        return {
+            status:"time_limit_exceeded",
+            output:"Time limit exceeded"
+        }
+    }
+
+    //console.log('Container status',status);
 
     const logs = await container?.logs({
         stderr:true,
@@ -46,7 +57,7 @@ export async function runCode(options: RunCodeOptions) {
     });
 
   const containerLogs = processLogs(logs);
-  console.log(containerLogs);
+  //console.log(containerLogs);
 
 
     //console.log("Container logs",logs?.toString("utf-8").trim());
@@ -56,12 +67,19 @@ export async function runCode(options: RunCodeOptions) {
     //console.log("Is matching", containerLogs === sampleOutput)
     await container?.remove();
 
+    clearTimeout(tle);
     if(status.StatusCode == 0){
-        clearTimeout(tle);
-        console.log("Container exited successfully");
+        //console.log("Container exited successfully");
+        return {
+            status:"success",
+            output:containerLogs
+        }
     }else{
-        clearTimeout(tle);
-        console.log("Container exited with error");
+        //console.log("Container exited with error");
+        return {
+            status:"fail",
+            output:containerLogs
+        }
     }
 }
 

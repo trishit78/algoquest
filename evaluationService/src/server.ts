@@ -7,8 +7,8 @@ import logger from './config/logger.config';
 import { attachCorrelationIdMiddleware } from './middlewares/correlation.middleware';
 import { startWorkers } from './workers/evaluation.worker';
 import { pullALLImages } from './utils/containers/pullImage.util';
-import { runCode } from './utils/containers/codeRunner';
-import { CPP_IMAGE } from './utils/constants';
+//import { runCode } from './utils/containers/codeRunner';
+//import { CPP_IMAGE } from './utils/constants';
 const app = express();
 
 app.use(express.json());
@@ -39,7 +39,7 @@ app.listen(serverConfig.PORT,async () => {
 
      await pullALLImages();
     console.log('image pulled successfully')
-   await testCppCode();
+   //await testCppCode();
 });
 
 
@@ -62,24 +62,24 @@ app.listen(serverConfig.PORT,async () => {
 //     })
 // }
 
-async function testCppCode() {
-    const cppCode = `
-    #include <iostream>
-    int main() {
-    int n;
-    std::cin>>n;
+// async function testCppCode() {
+//     const cppCode = `
+//     #include <iostream>
+//     int main() {
+//     int n;
+//     std::cin>>n;
        
-        std::cout<<n*n;
+//         std::cout<<n*n;
         
-        return 0;
-    }
-    `;
+//         return 0;
+//     }
+//     `;
 
-    await runCode({
-        code:cppCode,
-        language:"cpp",
-        timeout:5000,
-        imageName:CPP_IMAGE,
-        input:"5"
-    })
-}
+//     await runCode({
+//         code:cppCode,
+//         language:"cpp",
+//         timeout:5000,
+//         imageName:CPP_IMAGE,
+//         input:"5"
+//     })
+// }
