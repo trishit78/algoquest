@@ -55,9 +55,9 @@ export async function deleteSubmissionByIdHandler(req:Request,res:Response) {
 export async function updateSubmissionStatusHandler(req:Request,res:Response) {
     
     const {id} = req.params;
-    const {status,data} = req.body;
+    const {status,submissionData} = req.body;
     
-    const submission = await updateSubmissionStatusService(id,status,data);
+    const submission = await updateSubmissionStatusService(id,status,submissionData);
 
     logger.info("submission fetched successfully", {
         submissionId:id,

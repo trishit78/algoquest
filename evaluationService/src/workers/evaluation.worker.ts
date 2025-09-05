@@ -6,31 +6,36 @@ import { createNewRedisConnection } from "../config/redis.config";
 import { EvaluationJob, EvaluationResult, TestCase } from "../interfaces/evaluation.interface";
 import { runCode } from "../utils/containers/codeRunner";
 import { LANGUAGE_CONFIG } from "../config/language.config";
+import { updateSubmission } from "../apis/submission.api";
 
 
 
 function matchTestCasesWithResults(testcases:TestCase[],results:EvaluationResult[]){
     
-    const output:string[] = [];
+    const output:Record<string,string> = {};
     if(results.length !== testcases.length){
         console.log("WA");
         return;
     }
 
     testcases.map((testcase,index)=>{
+        let val= "";
         if(results[index].status ==="time_limit_exceeded"){
-            output.push("TLE")
+           val="TLE";
         }
         else if(results[index].status === "failed"){
-            output.push("Error");
+            val="Error";
         }else{
             if(results[index].output === testcase.output){
-                output.push("AC");
+                val="AC";
             }
             else{
-                output.push("WA");
+                val="WA";
             }
         }
+
+        console.log("value of testcases",val);
+        output[testcase._id] = val;
     });
     return output;
 }
@@ -41,6 +46,8 @@ async function setupEvaluationWorker() {
         logger.info(`Processing job ${job.id}`);
         const data:EvaluationJob = job.data;
         console.log(data);
+
+        console.log("data problem testcases",  data.problem.testcases);
 
 try {
     const testCasesRunnerPromise = data.problem.testcases.map(testcase =>{
@@ -61,6 +68,12 @@ try {
     const output = matchTestCasesWithResults(data.problem.testcases,testCasesRunnerResults)
 
     console.log("output",output);
+    // await updateSubmission(data.submissionId,"completed",output);
+    if (output) {
+        await updateSubmission(data.submissionId,"completed",output);
+    } else {
+        await updateSubmission(data.submissionId,"failed",{});
+    }
 
 } catch (error) {
     logger.error(`Evaluation job failed: ${job}`,error);
