@@ -3,9 +3,30 @@ import express from 'express';
 import { serverConfig } from './config/index.js';
 import { connectionDB } from './config/db.config.js';
 import v1Router from './router/v1Router/index.js';
-
+import * as proxy from 'http-proxy-middleware'
 
 const app = express();
+
+const problemProxyOptions:proxy.Options & {target:string,changeOrigin:boolean}= {
+    target:serverConfig.PROBLEM_SERVICE,
+    changeOrigin:true,
+    pathRewrite:{
+        '^/problemservice':'/'
+    }
+};
+
+const submissionProxyOptions:proxy.Options & {target:string,changeOrigin:boolean}={
+    target:serverConfig.SUBMISSION_SERVICE,
+    changeOrigin:true,
+    pathRewrite:{
+        '^/submissionservice':'/'
+    }
+}
+
+
+app.use('/problemservice',proxy.createProxyMiddleware(problemProxyOptions))
+app.use('/submissionservice',proxy.createProxyMiddleware(submissionProxyOptions))
+
 app.use(express.json())
 
 app.use('/api',v1Router);
