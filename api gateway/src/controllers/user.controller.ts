@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { signUpService } from "../services/user.service.js";
+import { signInService, signUpService } from "../services/user.service.js";
 
 export const signUpHandler = async(req:Request,res:Response)=>{
     try {
@@ -19,3 +19,23 @@ export const signUpHandler = async(req:Request,res:Response)=>{
         }
     }
 }
+
+export const signInHandler = async(req:Request,res:Response)=>{
+    try {
+        const response = await signInService(req.body);
+        res.status(200).json({
+            success:true,
+            message:'User signed in successfully',
+            data:response
+        })
+    } catch (error) {
+        if(error instanceof Error){
+            res.status(400).json({
+                success:false,
+                message:"Internal Server Error",
+                data:error.message
+            })
+        }
+    }
+}
+
