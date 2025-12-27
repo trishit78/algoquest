@@ -29,3 +29,20 @@ export const getUserByEmail = async(userData:UserSigninDTO)=>{
         }
     }
 }
+
+export const getUserById = async(id:number)=>{
+    try {
+        const user = await User.findOne({
+            _id:id
+        });
+         if(!user){
+            throw new Error('No user found with the given ID');
+        }
+        return user;
+     } catch (error) {
+         if(error instanceof Error){
+            console.log(error)
+            throw new Error('error occured in sign up endpoint in repo layer');
+        }
+    }
+}

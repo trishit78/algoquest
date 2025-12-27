@@ -1,3 +1,4 @@
+/// <reference path="./types/express.d.ts" />
 import express from 'express';
 import { serverConfig } from './config/index.js';
 import { connectionDB } from './config/db.config.js';
