@@ -1,11 +1,9 @@
-import express, { type Request, type Response } from 'express';
+import express from 'express';
+import { signUpHandler } from '../../controllers/user.controller.js';
 
 const authRouter = express.Router()
 
 
-authRouter.get('/ping',(_req:Request,res:Response)=>{
-    res.send('hello');
-    console.log('ok')
-})
+authRouter.post('/signup',signUpHandler);
 
 export default authRouter;
