@@ -6,7 +6,7 @@ import { createNewRedisConnection } from "../config/redis.config";
 import { EvaluationJob, EvaluationResult, TestCase } from "../interfaces/evaluation.interface";
 import { runCode } from "../utils/containers/codeRunner";
 import { LANGUAGE_CONFIG } from "../config/language.config";
-import { getUserByID, updateSubmission } from "../apis/submission.api";
+import { addScoresToLeaderboard, getUserByID, updateSubmission } from "../apis/submission.api";
 
 
 
@@ -80,6 +80,8 @@ const someAccepted = values.some((v) => v === "AC");
 console.log('fetched username',userName?.data)
 if (allAccepted) {
     await updateSubmission(data.submissionId, "completed", output);
+    await addScoresToLeaderboard(userName?.data)
+
 } else if (someAccepted) {
   await updateSubmission(data.submissionId, "attempted", output);
 } else {

@@ -4,6 +4,8 @@ import type { UserDataDTO, UserSigninDTO } from "../DTO/user.DTO.js";
 import { getUserByEmail, getUserById, getUserByIdRepo, signUpRepo } from "../repositories/user.repository.js";
 import { comparePassword, createToken, hashPassword } from "../utils/auth.js";
 import jwt from 'jsonwebtoken'
+import axios from "axios";
+
 
 export const signUpService = async(userData:UserDataDTO)=>{
     try {
@@ -15,6 +17,10 @@ export const signUpService = async(userData:UserDataDTO)=>{
             password:hashedPassword,
 
         });
+        if(!user){
+            throw new Error('cannot create the user')
+        }
+        await addUserNameToLeaderboard(user?.username)
         return user;
     } catch (error) {
         if(error instanceof Error){
@@ -99,4 +105,20 @@ export async function getUserByIdService(id:string) {
         }
             
     } 
+}
+
+
+export async function addUserNameToLeaderboard(name:string) {
+    try {
+        const url = `${serverConfig.API_GATEWAY}/leaderboard/api/v1/adduser`;
+        await axios.put(url,{
+            userData:name,
+            score: '0'
+        })
+
+        return;
+    } catch (error) {
+        console.error(`Failed to add scores in leaderboard: ${error}`);
+        return error;
+    }
 }

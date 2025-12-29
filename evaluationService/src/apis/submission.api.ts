@@ -27,7 +27,7 @@ export async function updateSubmission(submissionId:string,status:string,output:
 
 export async function getUserByID(userId:string) {
     try {
-        const url = `${serverConfig.API_GATEWAY}/user/${userId}`;
+        const url = `${serverConfig.API_GATEWAY}/api/v1/user/${userId}`;
         const userName = await axios.get(url);
         if(!userName){
             throw new InternalServerError('Failed to get UserName')
@@ -35,6 +35,23 @@ export async function getUserByID(userId:string) {
         return userName.data
     } catch (error) {
         logger.error(`Failed to get UserName: ${error}`);
+        return error;
+    }
+}
+
+
+
+export async function addScoresToLeaderboard(name:string) {
+    try {
+        const url = `${serverConfig.API_GATEWAY}/leaderboard/api/v1/increment`;
+        await axios.post(url,{
+            userData:name,
+            score: '10'
+        })
+
+        return;
+    } catch (error) {
+        logger.error(`Failed to add scores in leaderboard: ${error}`);
         return error;
     }
 }

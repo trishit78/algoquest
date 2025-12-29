@@ -24,9 +24,17 @@ const submissionProxyOptions:proxy.Options & {target:string,changeOrigin:boolean
         '^/submissionservice':'/'
     }
 }
+const leaderboardProxyOptions:proxy.Options & {target:string,changeOrigin:boolean}={
+    target:serverConfig.LEADERBOARD,
+    changeOrigin:true,
+    pathRewrite:{
+        '^/leaderboard':'/'
+    }
+}
 
 
 app.use('/problemservice',proxy.createProxyMiddleware(problemProxyOptions))
+app.use('/leaderboard',proxy.createProxyMiddleware(leaderboardProxyOptions))
 app.use('/submissionservice',authRequest,proxy.createProxyMiddleware(submissionProxyOptions))
 
 
