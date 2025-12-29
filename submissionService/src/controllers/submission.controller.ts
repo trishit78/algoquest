@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import {   createSubmissionService, deleteSubmissionByIdService, getSubmissionByIdService, getSubmissionByProblemIdService, updateSubmissionStatusService } from "../services/submission.service";
+import {   createSubmissionService, deleteSubmissionByIdService, getSubmissionByIdService, getSubmissionByProblemIdService, getSubmissionDataByService, updateSubmissionStatusService } from "../services/submission.service";
 import logger from "../config/logger.config";
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -105,4 +105,15 @@ export async function updateSubmissionStatusHandler(req:Request,res:Response) {
     })
 
 
+}
+
+
+export async function getSubmissionData(req:Request,res:Response) {
+    const {submissionId} = req.params;
+    const response = await getSubmissionDataByService(submissionId);
+    res.status(200).json({
+          message:"submission data fetched successfully",
+        data:response,
+        success:true
+    })
 }

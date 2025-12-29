@@ -29,3 +29,10 @@ export async function updateStatus(id:string,status:SubmissionStatus,submissionD
     const submission = await Submission.findByIdAndUpdate(id,{status,submissionData},{new:true});
     return submission;
 }
+
+export async function getSubmissionDataRepo(id:string) {
+    const result = await Submission.findOne({
+        _id:id
+    });
+    return result;
+}

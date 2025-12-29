@@ -1,5 +1,5 @@
 import express from "express";
-import { createSubmissionHandler, deleteSubmissionByIdHandler, getSubmissionByProblemIdHandler, getSubmissionByUserIdAndProblemIdHandler, updateSubmissionStatusHandler } from "../../controllers/submission.controller";
+import { createSubmissionHandler, deleteSubmissionByIdHandler, getSubmissionByProblemIdHandler, getSubmissionByUserIdAndProblemIdHandler, getSubmissionData, updateSubmissionStatusHandler } from "../../controllers/submission.controller";
 import { validateQueryParams, validateRequestBody } from "../../validators";
 import { submissionQuerySchema, updateSubmissionStatusSchema } from "../../validators/submission.validator";
 
@@ -37,7 +37,7 @@ submissionRouter.delete(
 
 
 
-
+submissionRouter.get('/:submissionId',getSubmissionData);
 
 export default submissionRouter;
 

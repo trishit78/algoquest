@@ -199,7 +199,7 @@ export default function ProblemPage({ params }: { params: Promise<{ id: string }
       )
 
       const submissionData = submissionRes.data?.data || submissionRes.data
-      console.log(submissionData);
+     
       const submissionId = submissionData?._id || submissionData?.id || null
 
       if (!submissionId) {
@@ -221,39 +221,46 @@ export default function ProblemPage({ params }: { params: Promise<{ id: string }
           return
         }
 
-        // try {
-        //   const r = await axios.get(`http://localhost:3001/api/v1/submissions/${submissionId}`)
-        //   const currentSubmission = r.data?.data || r.data
-        //   const currentStatus = currentSubmission?.status
+        try {
+          const r = await axios.get(`http://localhost:5000/submissionservice/api/v1/submissions/${submissionId}`,
+              {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+          )
+          console.log(r.data.data.submissionData);
+          const currentSubmission = r.data?.data || r.data
+          const currentStatus = currentSubmission?.status
           
-        //   setStatus(currentStatus || 'UNKNOWN')
+          setStatus(currentStatus || 'UNKNOWN')
 
-        //   // Update evalResult progressively as test case results come in
-        //   const details = currentSubmission.submissionData || {}
+          // Update evalResult progressively as test case results come in
+          const details = currentSubmission.submissionData || {}
           
-        //   // Update evalResult even if not terminal, so UI can show progress
-        //   setEvalResult((prev: any) => ({
-        //     status: currentStatus,
-        //     details: { ...prev?.details, ...details },
-        //     submission: currentSubmission
-        //   }))
+          // Update evalResult even if not terminal, so UI can show progress
+          setEvalResult((prev: any) => ({
+            status: currentStatus,
+            details: { ...prev?.details, ...details },
+            submission: currentSubmission
+          }))
 
-        //   const terminalStatuses = ['SUCCESS', 'FAILED', 'COMPLETED', 'ERROR', 'TIMEOUT']
+          const terminalStatuses = ['SUCCESS', 'FAILED', 'COMPLETED', 'ERROR', 'TIMEOUT']
           
-        //   if (currentStatus && terminalStatuses.includes(String(currentStatus).toUpperCase())) {
-        //     if (pollRef.current) {
-        //       clearInterval(pollRef.current)
-        //       pollRef.current = null
-        //     }
-        //     setSubmitting(false)
-        //   }
-        // } catch (err: any) {
-        //   // If it's not a 404, log the error but continue polling
-        //   if (err.response?.status !== 404) {
-        //     console.error('Error polling submission:', err)
-        //   }
-        //   // Don't stop polling on 404 - submission might not be ready yet
-        // }
+          if (currentStatus && terminalStatuses.includes(String(currentStatus).toUpperCase())) {
+            if (pollRef.current) {
+              clearInterval(pollRef.current)
+              pollRef.current = null
+            }
+            setSubmitting(false)
+          }
+        } catch (err: any) {
+          // If it's not a 404, log the error but continue polling
+          if (err.response?.status !== 404) {
+            console.error('Error polling submission:', err)
+          }
+          // Don't stop polling on 404 - submission might not be ready yet
+        }
       }, 2000)
     
     } catch (err: any) {

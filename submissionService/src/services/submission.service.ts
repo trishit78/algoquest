@@ -2,7 +2,7 @@ import { getProblemById } from "../apis/problem.api";
 import logger from "../config/logger.config";
 import { ISubmission, ISubmissionData, SubmissionLanguage, SubmissionStatus } from "../models/submission.model";
 import { addSubmissionJob } from "../producers/submission.producer";
-import { createSubmission, deleteById, findById, findProblemById, updateStatus } from "../repositories/submission.repository";
+import { createSubmission, deleteById, findById, findProblemById, getSubmissionDataRepo, updateStatus } from "../repositories/submission.repository";
 import { BadRequestError, NotFoundError } from "../utils/errors/app.error";
 
 export type submissionDataDTO={
@@ -83,4 +83,14 @@ export async function updateSubmissionStatusService(id:string,status:SubmissionS
         throw new NotFoundError("Submission not found");
     }
     return submission;
+}
+
+
+
+export async function getSubmissionDataByService(id:string) {
+    const submissionData = getSubmissionDataRepo(id);
+    if(!submissionData){
+        throw new NotFoundError("Submission data not found");
+    }
+    return submissionData;
 }
