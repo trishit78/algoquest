@@ -1,7 +1,7 @@
 
 import { serverConfig } from "../config/index.js";
 import type { UserDataDTO, UserSigninDTO } from "../DTO/user.DTO.js";
-import { getUserByEmail, getUserById, signUpRepo } from "../repositories/user.repository.js";
+import { getUserByEmail, getUserById, getUserByIdRepo, signUpRepo } from "../repositories/user.repository.js";
 import { comparePassword, createToken, hashPassword } from "../utils/auth.js";
 import jwt from 'jsonwebtoken'
 
@@ -85,4 +85,18 @@ export async function isAuthenticated(token:string){
         }
         throw new Error('Internal server error in auth middleware')
     }
+}
+
+
+export async function getUserByIdService(id:string) {
+    try {
+        const user = await getUserByIdRepo(id);
+        return user;
+     } catch (error) {
+        if(error instanceof Error){
+            console.log(error)
+            throw new Error('error occured in get user by id endpoint in service layer');
+        }
+            
+    } 
 }

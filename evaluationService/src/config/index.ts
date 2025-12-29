@@ -5,6 +5,7 @@ type ServerConfig = {
     PORT: number,
     PROBLEM_SERIVCE:string,
     SUBMISSION_SERIVCE:string,
+    API_GATEWAY:string,
 }
 
 function loadEnv() {
@@ -17,6 +18,7 @@ loadEnv();
 export const serverConfig: ServerConfig = {
     PORT: Number(process.env.PORT) || 3002,
     PROBLEM_SERIVCE:process.env.PROBLEM_SERIVCE || "http://localhost:3000/api/v1",
-    SUBMISSION_SERIVCE:process.env.SUBMISSION_SERIVCE || "http://localhost:3001/api/v1"
+    SUBMISSION_SERIVCE:process.env.SUBMISSION_SERIVCE || "http://localhost:3001/api/v1",
+    API_GATEWAY:process.env.API_GATEWAY || "http://localhost:5000/api/v1"
 
 };

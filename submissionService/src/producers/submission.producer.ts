@@ -8,7 +8,8 @@ export interface ISubmissionJob{
     submissionId:string;
     problem:IProblemDetails;
     code:string;
-    language:SubmissionLanguage
+    language:SubmissionLanguage,
+    userId:string
 }
 
 export async function addSubmissionJob(data:ISubmissionJob):Promise<string | null> {

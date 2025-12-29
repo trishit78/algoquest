@@ -6,7 +6,7 @@ import { createNewRedisConnection } from "../config/redis.config";
 import { EvaluationJob, EvaluationResult, TestCase } from "../interfaces/evaluation.interface";
 import { runCode } from "../utils/containers/codeRunner";
 import { LANGUAGE_CONFIG } from "../config/language.config";
-import { updateSubmission } from "../apis/submission.api";
+import { getUserByID, updateSubmission } from "../apis/submission.api";
 
 
 
@@ -45,8 +45,12 @@ async function setupEvaluationWorker() {
     const worker = new Worker(SUBMISSION_QUEUE,async(job:Job)=>{
         logger.info(`Processing job ${job.id}`);
         const data:EvaluationJob = job.data;
-        console.log(data);
-
+        console.log('data from worker',data);
+        const userName = await getUserByID(data.userId)
+            if(!userName){
+                throw Error('username not found');
+            }
+       
         console.log("data problem testcases",  data.problem.testcases);
 
 try {
@@ -65,15 +69,22 @@ try {
     console.log("testCasesRunnerResults",testCasesRunnerResults);
 
 
-    const output = matchTestCasesWithResults(data.problem.testcases,testCasesRunnerResults)
+    const output = matchTestCasesWithResults(data.problem.testcases,testCasesRunnerResults) as Record<string,string>;
 
     console.log("output",output);
-    // await updateSubmission(data.submissionId,"completed",output);
-    if (output) {
-        await updateSubmission(data.submissionId,"completed",output);
-    } else {
-        await updateSubmission(data.submissionId,"failed",{});
-    }
+    
+  const values = Object.values(output);
+const allAccepted = values.every((v) => v === "AC");
+const someAccepted = values.some((v) => v === "AC");
+
+console.log('fetched username',userName?.data)
+if (allAccepted) {
+    await updateSubmission(data.submissionId, "completed", output);
+} else if (someAccepted) {
+  await updateSubmission(data.submissionId, "attempted", output);
+} else {
+  await updateSubmission(data.submissionId, "failed", output);
+}
 
 } catch (error) {
     logger.error(`Evaluation job failed: ${job}`,error);

@@ -7,7 +7,8 @@ export enum SubmissionLanguage {
 
 export enum SubmissionStatus {
     PENDING = "pending",
-  COMPLETED="completed"
+  COMPLETED="completed",
+  ATTEMPTED="attempted"
 }
 
 export interface ISubmissionData {

@@ -23,3 +23,18 @@ export async function updateSubmission(submissionId:string,status:string,output:
         return null;
     }
 }
+
+
+export async function getUserByID(userId:string) {
+    try {
+        const url = `${serverConfig.API_GATEWAY}/user/${userId}`;
+        const userName = await axios.get(url);
+        if(!userName){
+            throw new InternalServerError('Failed to get UserName')
+        }
+        return userName.data
+    } catch (error) {
+        logger.error(`Failed to get UserName: ${error}`);
+        return error;
+    }
+}

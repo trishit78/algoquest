@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import type { UserDataDTO, UserSigninDTO } from "../DTO/user.DTO.js";
 import { User } from "../model/user.model.js";
 
@@ -40,6 +41,23 @@ export const getUserById = async(id:number)=>{
         }
         return user;
      } catch (error) {
+         if(error instanceof Error){
+            console.log(error)
+            throw new Error('error occured in sign up endpoint in repo layer');
+        }
+    }
+}
+
+export const getUserByIdRepo = async(id:string)=>{
+    try {
+        const user = await User.findById(
+         id
+        );
+         if(!user){
+            throw new Error('No user found with the given ID');
+        }
+        return user?.username;
+ } catch (error) {
          if(error instanceof Error){
             console.log(error)
             throw new Error('error occured in sign up endpoint in repo layer');

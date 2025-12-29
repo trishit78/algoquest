@@ -23,7 +23,8 @@ export interface EvaluationJob{
     submissionId:string;
     code:string,
     language:"python"| "cpp",
-    problem:Problem
+    problem:Problem,
+    userId:string
 }
 
 export interface EvaluationResult{

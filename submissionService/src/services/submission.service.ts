@@ -45,8 +45,8 @@ export async function createSubmissionService(submissionData:Partial<ISubmission
         submissionId:submission._id,
         problem,
         code:submissionData.code || "",
-        language:submissionData.language || SubmissionLanguage.CPP
-
+        language:submissionData.language || SubmissionLanguage.CPP,
+        userId:submissionData.userId
     })
 
     logger.info(`Submission job added: ${jobId}`);
