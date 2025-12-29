@@ -7,6 +7,7 @@ import * as proxy from 'http-proxy-middleware'
 import { authRequest } from './middleware/auth.middleware.js';
 import cors from 'cors';
 const app = express();
+app.use(cors());
 
 const problemProxyOptions:proxy.Options & {target:string,changeOrigin:boolean}= {
     target:serverConfig.PROBLEM_SERVICE,
@@ -28,9 +29,9 @@ const submissionProxyOptions:proxy.Options & {target:string,changeOrigin:boolean
 app.use('/problemservice',proxy.createProxyMiddleware(problemProxyOptions))
 app.use('/submissionservice',authRequest,proxy.createProxyMiddleware(submissionProxyOptions))
 
-app.use(cors())
-app.use(express.json())
 
+
+app.use(express.json());
 app.use('/api',v1Router);
 
 app.listen(serverConfig.PORT,async()=>{
