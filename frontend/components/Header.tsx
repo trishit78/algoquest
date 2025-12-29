@@ -36,6 +36,12 @@ export default function Header() {
           >
             Problems
           </Link>
+          <Link
+            href="/leaderboard"
+            className="text-textSecondary hover:text-white transition-colors"
+          >
+            Leaderboard
+          </Link>
           
           {isAuthenticated ? (
             <button
