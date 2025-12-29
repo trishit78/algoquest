@@ -1,0 +1,156 @@
+openapi: 3.0.3
+info:
+  title: Problem Service API
+  version: 1.0.0
+servers:
+  - url: /v1
+paths:
+  /ping:
+    get:
+      summary: Ping the service
+      operationId: ping
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PingResponse'
+  /problems:
+    post:
+      summary: Create a new problem
+      operationId: createProblem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProblemCreate'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    get:
+      summary: List problems
+      operationId: listProblems
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Problem'
+  /problems/{id}:
+    get:
+      summary: Get a problem by id
+      operationId: getProblem
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Not found
+    put:
+      summary: Update a problem
+      operationId: updateProblem
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProblemUpdate'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    delete:
+      summary: Delete a problem
+      operationId: deleteProblem
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Deleted
+components:
+  schemas:
+    PingResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: pong
+    Problem:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        statement:
+          type: string
+        difficulty:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+    ProblemCreate:
+      type: object
+      required: [title, statement]
+      properties:
+        title:
+          type: string
+        statement:
+          type: string
+        difficulty:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+    ProblemUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        statement:
+          type: string
+        difficulty:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string

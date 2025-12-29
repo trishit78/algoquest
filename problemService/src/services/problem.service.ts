@@ -1,5 +1,3 @@
-
-
 import { createProblem, deleteProblem, findByDifficulty, getAllProblems, getProblem, searchProblem, updateProblem } from "../repositories/problem.repositories";
 import { BadRequestError, NotFoundError } from "../utils/errors/app.error";
 import { IProblem } from "../models/problem";
@@ -7,8 +5,6 @@ import { sanitizeMarkdown } from "../utils/markdown.sanitizer";
 import { CreateProblemDto } from "../validators/problem.validator";
 
 export async function createProblemService(problemData:CreateProblemDto){
-
-//todo
     const sanitizedPayload = {
         ...problemData,
         description:await sanitizeMarkdown(problemData.description),
@@ -49,8 +45,6 @@ export async function updateProblemService(problemId:string,updateData:any) {
         throw new NotFoundError("Problem not found");
     }
 
-
-    //todo
     const sanitizedPayload :Partial<IProblem>={
         ...updateData
     };

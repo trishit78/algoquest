@@ -1,0 +1,111 @@
+openapi: 3.0.3
+info:
+  title: Submission Service API
+  version: 1.0.0
+servers:
+  - url: /v1
+paths:
+  /ping:
+    get:
+      summary: Ping the service
+      operationId: ping
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PingResponse'
+  /submissions:
+    post:
+      summary: Create a submission
+      operationId: createSubmission
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmissionCreate'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+    get:
+      summary: List submissions
+      operationId: listSubmissions
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submission'
+  /submissions/{id}:
+    get:
+      summary: Get a submission
+      operationId: getSubmission
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+        '404':
+          description: Not found
+components:
+  schemas:
+    PingResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: pong
+    Submission:
+      type: object
+      properties:
+        id:
+          type: string
+        problemId:
+          type: string
+        userId:
+          type: string
+        language:
+          type: string
+        code:
+          type: string
+        status:
+          type: string
+          example: queued
+        createdAt:
+          type: string
+          format: date-time
+    SubmissionCreate:
+      type: object
+      required: [problemId, userId, language, code]
+      properties:
+        problemId:
+          type: string
+        userId:
+          type: string
+        language:
+          type: string
+        code:
+          type: string

@@ -4,7 +4,8 @@ import { serverConfig } from './config/index.js';
 import { connectionDB } from './config/db.config.js';
 import v1Router from './router/v1Router/index.js';
 import * as proxy from 'http-proxy-middleware'
-
+import { authRequest } from './middleware/auth.middleware.js';
+import cors from 'cors';
 const app = express();
 
 const problemProxyOptions:proxy.Options & {target:string,changeOrigin:boolean}= {
@@ -25,8 +26,9 @@ const submissionProxyOptions:proxy.Options & {target:string,changeOrigin:boolean
 
 
 app.use('/problemservice',proxy.createProxyMiddleware(problemProxyOptions))
-app.use('/submissionservice',proxy.createProxyMiddleware(submissionProxyOptions))
+app.use('/submissionservice',authRequest,proxy.createProxyMiddleware(submissionProxyOptions))
 
+app.use(cors())
 app.use(express.json())
 
 app.use('/api',v1Router);

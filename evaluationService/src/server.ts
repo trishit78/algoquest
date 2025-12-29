@@ -9,10 +9,11 @@ import { startWorkers } from './workers/evaluation.worker';
 import { pullALLImages } from './utils/containers/pullImage.util';
 //import { runCode } from './utils/containers/codeRunner';
 //import { CPP_IMAGE } from './utils/constants';
+import cors from 'cors';
 const app = express();
 
 app.use(express.json());
-
+app.use(cors())
 /**
  * Registering all the routers and their corresponding routes with out app server object.
  */

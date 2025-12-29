@@ -6,10 +6,11 @@ import { appErrorHandler, genericErrorHandler } from './middlewares/error.middle
 import logger from './config/logger.config';
 import { attachCorrelationIdMiddleware } from './middlewares/correlation.middleware';
 import { connectDB } from './config/db';
+import cors from 'cors';
 const app = express();
 
 app.use(express.json());
-
+app.use(cors())
 /**
  * Registering all the routers and their corresponding routes with out app server object.
  */

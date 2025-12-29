@@ -1,0 +1,97 @@
+openapi: 3.0.3
+info:
+  title: Evaluation Service API
+  version: 1.0.0
+servers:
+  - url: /v1
+paths:
+  /ping:
+    get:
+      summary: Ping the service
+      operationId: ping
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PingResponse'
+  /evaluations:
+    post:
+      summary: Enqueue a submission for evaluation
+      operationId: enqueueEvaluation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EvaluationRequest'
+      responses:
+        '202':
+          description: Accepted (queued)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvaluationQueued'
+  /evaluations/{id}:
+    get:
+      summary: Get evaluation result
+      operationId: getEvaluation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvaluationResult'
+        '404':
+          description: Not found
+components:
+  schemas:
+    PingResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: pong
+    EvaluationRequest:
+      type: object
+      required: [submissionId]
+      properties:
+        submissionId:
+          type: string
+        timeoutSeconds:
+          type: integer
+          default: 10
+    EvaluationQueued:
+      type: object
+      properties:
+        queueId:
+          type: string
+        enqueued:
+          type: string
+          format: date-time
+    EvaluationResult:
+      type: object
+      properties:
+        id:
+          type: string
+        submissionId:
+          type: string
+        status:
+          type: string
+        score:
+          type: number
+        stdout:
+          type: string
+        stderr:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
