@@ -1,15 +1,13 @@
 import express from "express";
-import { createSubmissionHandler, deleteSubmissionByIdHandler, getSubmissionByIdHandler, getSubmissionByProblemIdHandler, updateSubmissionStatusHandler } from "../../controllers/submission.controller";
+import { createSubmissionHandler, deleteSubmissionByIdHandler, getSubmissionByProblemIdHandler, getSubmissionByUserIdAndProblemIdHandler, updateSubmissionStatusHandler } from "../../controllers/submission.controller";
 import { validateQueryParams, validateRequestBody } from "../../validators";
-import { createSubmissionSchema, submissionQuerySchema, updateSubmissionStatusSchema } from "../../validators/submission.validator";
+import { submissionQuerySchema, updateSubmissionStatusSchema } from "../../validators/submission.validator";
 
 
 const submissionRouter = express.Router();
 
 
-
-
-submissionRouter.post("/create",validateRequestBody(createSubmissionSchema),createSubmissionHandler);
+submissionRouter.post("/create",createSubmissionHandler);
 
 submissionRouter.get(
     '/problem/:problemId', 
@@ -17,8 +15,8 @@ submissionRouter.get(
     getSubmissionByProblemIdHandler
 );
 submissionRouter.get(
-    '/:id', 
-    getSubmissionByIdHandler
+    '/', 
+    getSubmissionByUserIdAndProblemIdHandler
 );
 
 

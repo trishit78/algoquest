@@ -17,6 +17,7 @@ export interface ISubmissionData {
 export interface ISubmission extends Document{
     _id: any;
     problemId:string,
+    userId:string,
     code:string,
     language:SubmissionLanguage;
     status:SubmissionStatus;
@@ -30,6 +31,10 @@ const submissionSchema = new Schema<ISubmission>({
     problemId:{
         type:String,
         required:[true,"Problem Is required  for the submission"]
+    },
+    userId:{
+        type:String,
+        required:[true,"UserID is required  for the submission"]
     },
     code:{
         type:String,

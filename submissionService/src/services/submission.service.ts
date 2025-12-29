@@ -5,6 +5,11 @@ import { addSubmissionJob } from "../producers/submission.producer";
 import { createSubmission, deleteById, findById, findProblemById, updateStatus } from "../repositories/submission.repository";
 import { BadRequestError, NotFoundError } from "../utils/errors/app.error";
 
+export type submissionDataDTO={
+    id:string,
+    problemId:string
+}
+
 
 export async function createSubmissionService(submissionData:Partial<ISubmission>):Promise<ISubmission> {
     //checking if the problem exists or not
@@ -17,6 +22,9 @@ export async function createSubmissionService(submissionData:Partial<ISubmission
     }
     if(!submissionData.language){
         throw new BadRequestError("language is required");
+    }
+    if(!submissionData.userId){
+        throw new BadRequestError("userId is required");
     }
 
     const problem = await getProblemById(submissionData.problemId);
@@ -48,8 +56,8 @@ export async function createSubmissionService(submissionData:Partial<ISubmission
 
 }
 
-export async function getSubmissionByIdService(id:string):Promise<ISubmission| null> {
-    const submission  = await findById(id);
+export async function getSubmissionByIdService(submissionData:submissionDataDTO):Promise<ISubmission[]| null> {
+    const submission  = await findById(submissionData);
     if(!submission){
         throw new NotFoundError("Submission not found");
     }

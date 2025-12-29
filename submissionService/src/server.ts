@@ -9,6 +9,7 @@ import logger from './config/logger.config';
 import { attachCorrelationIdMiddleware } from './middlewares/correlation.middleware';
 import { connectDB } from './config/db';
 import cors from 'cors';
+import { attachUserContext } from './middlewares/context.middleware';
 const app = express();
 
 app.use(express.json());
@@ -17,6 +18,7 @@ app.use(cors())
  * Registering all the routers and their corresponding routes with out app server object.
  */
 
+app.use(attachUserContext);
 app.use(attachCorrelationIdMiddleware);
 app.use('/api/v1', v1Router);
 app.use('/api/v2', v2Router); 
@@ -25,7 +27,6 @@ app.use('/api/v2', v2Router);
 /**
  * Add the error handler middleware
  */
-
 app.use(appErrorHandler);
 app.use(genericErrorHandler);
 

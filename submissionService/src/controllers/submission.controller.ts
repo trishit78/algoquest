@@ -1,25 +1,58 @@
 import { Request, Response } from "express";
-import { createSubmissionService, deleteSubmissionByIdService, getSubmissionByIdService, getSubmissionByProblemIdService, updateSubmissionStatusService } from "../services/submission.service";
+import {   createSubmissionService, deleteSubmissionByIdService, getSubmissionByIdService, getSubmissionByProblemIdService, updateSubmissionStatusService } from "../services/submission.service";
 import logger from "../config/logger.config";
-
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: number;
+  };
+}
 
 export async function createSubmissionHandler(req:Request,res:Response) {
-    const createSubmission = await createSubmissionService(req.body);
+ const authReq = req as AuthenticatedRequest;
+  if (!authReq.user) {
+      res.status(401).json({
+       success: false,
+       message: 'Unauthorized'
+     });
+     return;
+  }
 
+  const submissionData = {
+    ...req.body,
+    userId:authReq.user.id
+  }
+     const createSubmission = await createSubmissionService(submissionData);
     res.status(201).json({
         message:"Problem submitted successfully",
         data:createSubmission,
-        success:true,
+        success:true
     })
 }
 
-export async function getSubmissionByIdHandler(req:Request,res:Response) {
-    
-    const {id} = req.params;
-    const submission = await getSubmissionByIdService(id);
+export async function getSubmissionByUserIdAndProblemIdHandler(req:Request,res:Response) {
+    const authReq = req as AuthenticatedRequest;
+
+    const problemId = req.body?.problemId || req.query?.problemId;
+
+  if (!problemId) {
+     res.status(400).json({
+      success: false,
+      message: 'problemId is required',
+    });
+    return;
+  }
+  if (!authReq.user) {
+      res.status(401).json({
+       success: false,
+       message: 'Unauthorized'
+     });
+     return;
+  }
+   const id =String(authReq.user.id);
+    const submission = await getSubmissionByIdService({id,problemId});
 
     res.status(200).json({
-        message:"Problem fetched successfully",
+        message:"All Problems by a user fetched successfully",
         data:submission,
         success:true
     })

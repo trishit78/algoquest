@@ -1,13 +1,18 @@
 import { ISubmission, ISubmissionData, Submission, SubmissionStatus } from "../models/submission.model";
+import { submissionDataDTO } from "../services/submission.service";
 
 export async function createSubmission(submissionData:Partial<ISubmission>):Promise<ISubmission> {
     const newSubmission = await Submission.create(submissionData);
-    
+    console.log(newSubmission)
     return newSubmission;
 }
 
-export async function findById(id:String):Promise<ISubmission | null> {
-    const submission =  await Submission.findById(id);
+export async function findById(submissionData:submissionDataDTO):Promise<ISubmission[] | null> {
+    
+    const submission =  await Submission.find({
+        userId:submissionData.id,
+        problemId:submissionData.problemId
+    });
     return submission;
 }
 

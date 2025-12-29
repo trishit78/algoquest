@@ -1,28 +1,27 @@
 "use client"
+export const dynamic = 'force-dynamic'
 
 import React, { useEffect, useState, useRef, use, useCallback } from 'react'
 import axios from 'axios'
-import dynamic from 'next/dynamic'
+import NextDynamic from 'next/dynamic'
 import { AnimatePresence, motion } from 'framer-motion'
 import { jwtDecode } from 'jwt-decode'
 import { AlertCircle, Check, Clock, CloudCog, X } from 'lucide-react'
 import { useToast } from "@/components/ui/use-toast"
 
-const MonacoEditor = dynamic(() => import('@monaco-editor/react'), { ssr: false })
+const MonacoEditor = NextDynamic(() => import('@monaco-editor/react'), { ssr: false })
 
 const defaultCode: Record<string, string> = {
-  javascript: '// Write your code here\nfunction solution() {\n  // Your solution\n  return;\n}',
-  python: '# Write your code here\ndef solution():\n    # Your solution\n    return',
-  cpp: '// Write your code here\n#include <iostream>\nusing namespace std;\n\nint main() {\n    // Your solution\n    return 0;\n}'
+  javascript: '// Write your code here\nfunction solution() {\n  return;\n}',
+  python: '# Write your code here\ndef solution():\n    return',
+  cpp: '// Write your code here\n#include <iostream>\nusing namespace std;\n\nint main() {\n    return 0;\n}'
 }
 
 async function fetchProblemServer(id: string) {
   try {
     const res = await axios.get(`http://localhost:4000/api/v1/problems/${id}`)
-    console.log(res.data)
     return res.data?.data || res.data || null
-  } catch (e) {
-    console.error('Error fetching problem:', e)
+  } catch {
     return null
   }
 }
@@ -101,27 +100,49 @@ export default function ProblemPage({ params }: { params: Promise<{ id: string }
     setCode(defaultCode[language] || defaultCode.javascript)
   }, [language])
 
-  const fetchSubmissions = async () => {
+  const fetchSubmissions = useCallback(async () => {
+    const token = localStorage.getItem('token')
+    if (!token) return
+
     setLoadingSubmissions(true)
     try {
-      const res = await axios.get(`http://localhost:3001/api/v1/submissions/problem/${id}`)
-      const data = res.data?.data || res.data || []
-      setSubmissions(Array.isArray(data) ? data : [])
-    } catch (error) {
-      console.error('Error fetching submissions:', error)
+      const res = await axios.get(
+        'http://localhost:5000/submissionservice/api/v1/submissions',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            problemId: id,
+          },
+        }
+      )
+
+      setSubmissions(res.data?.data || [])
+    } catch (e) {
+      toast({
+        title: 'Error',
+        description: 'Failed to load submissions',
+        variant: 'destructive',
+      })
     } finally {
       setLoadingSubmissions(false)
     }
-  }
+  }, [id, toast])
 
   // Fetch submissions when tab changes to 'submissions'
   useEffect(() => {
     if (activeTab === 'submissions') {
       fetchSubmissions()
     }
-  }, [activeTab, id])
-
+  }, [activeTab, fetchSubmissions])
   const handleSubmit = async () => {
+    // Clear any existing polling interval before starting a new submission
+    if (pollRef.current) {
+      clearInterval(pollRef.current)
+      pollRef.current = null
+    }
+
     const token = localStorage.getItem('token')
     if (!token) {
       toast({
@@ -158,7 +179,7 @@ export default function ProblemPage({ params }: { params: Promise<{ id: string }
     }
 
     setSubmitting(true)
-    setEvalResult(null)
+    setEvalResult({ status: null, details: {} })
     setStatus('QUEUED')
 
     try {
@@ -178,6 +199,7 @@ export default function ProblemPage({ params }: { params: Promise<{ id: string }
       )
 
       const submissionData = submissionRes.data?.data || submissionRes.data
+      console.log(submissionData);
       const submissionId = submissionData?._id || submissionData?.id || null
 
       if (!submissionId) {
@@ -190,42 +212,64 @@ export default function ProblemPage({ params }: { params: Promise<{ id: string }
       pollRef.current = setInterval(async () => {
         pollCount++
         if (pollCount > maxPolls) {
-           if (pollRef.current) clearInterval(pollRef.current)
-           setStatus('TIMEOUT')
-           setSubmitting(false)
-           return
-        }
-
-        try {
-          const r = await axios.get(`http://localhost:3001/api/v1/submissions/${submissionId}`)
-          const currentSubmission = r.data?.data || r.data
-          const currentStatus = currentSubmission?.status
-          
-          setStatus(currentStatus || 'UNKNOWN')
-
-          const terminalStatuses = ['SUCCESS', 'FAILED', 'COMPLETED', 'ERROR', 'TIMEOUT']
-          
-          if (currentStatus && terminalStatuses.includes(String(currentStatus).toUpperCase())) {
-            if (pollRef.current) clearInterval(pollRef.current)
-            
-            const details = currentSubmission.submissionData || {}
-            
-            setEvalResult({ 
-               status: currentStatus, 
-               details: details,
-               submission: currentSubmission
-            })
-            setSubmitting(false)
+          if (pollRef.current) {
+            clearInterval(pollRef.current)
+            pollRef.current = null
           }
-        } catch (err: any) {
-           if (err.response?.status !== 404) console.error(err)
+          setStatus('TIMEOUT')
+          setSubmitting(false)
+          return
         }
+
+        // try {
+        //   const r = await axios.get(`http://localhost:3001/api/v1/submissions/${submissionId}`)
+        //   const currentSubmission = r.data?.data || r.data
+        //   const currentStatus = currentSubmission?.status
+          
+        //   setStatus(currentStatus || 'UNKNOWN')
+
+        //   // Update evalResult progressively as test case results come in
+        //   const details = currentSubmission.submissionData || {}
+          
+        //   // Update evalResult even if not terminal, so UI can show progress
+        //   setEvalResult((prev: any) => ({
+        //     status: currentStatus,
+        //     details: { ...prev?.details, ...details },
+        //     submission: currentSubmission
+        //   }))
+
+        //   const terminalStatuses = ['SUCCESS', 'FAILED', 'COMPLETED', 'ERROR', 'TIMEOUT']
+          
+        //   if (currentStatus && terminalStatuses.includes(String(currentStatus).toUpperCase())) {
+        //     if (pollRef.current) {
+        //       clearInterval(pollRef.current)
+        //       pollRef.current = null
+        //     }
+        //     setSubmitting(false)
+        //   }
+        // } catch (err: any) {
+        //   // If it's not a 404, log the error but continue polling
+        //   if (err.response?.status !== 404) {
+        //     console.error('Error polling submission:', err)
+        //   }
+        //   // Don't stop polling on 404 - submission might not be ready yet
+        // }
       }, 2000)
     
     } catch (err: any) {
-      console.error(err)
+      console.error('Error submitting code:', err)
+      // Ensure interval is cleared on error
+      if (pollRef.current) {
+        clearInterval(pollRef.current)
+        pollRef.current = null
+      }
       setStatus('ERROR')
       setSubmitting(false)
+      toast({
+        title: "Submission Failed",
+        description: err.response?.data?.message || err.message || "Failed to submit code. Please try again.",
+        variant: "destructive"
+      })
     }
   }
 
@@ -382,28 +426,40 @@ export default function ProblemPage({ params }: { params: Promise<{ id: string }
                         {evalResult?.status === 'FAILED' && <span className="text-red-500 text-sm font-bold flex items-center gap-1"><X size={16}/> Wrong Answer</span>}
                      </div>
                      
-                     {/* Dynamic Test Case Bubbles */}
+                     {/* Dynamic Test Case Bubbles - Show all test cases and update as results come in */}
                      <div className="flex gap-3 flex-wrap">
                         {problem?.testcases?.map((testcase: any, index: number) => {
-                           const status = evalResult?.details?.[testcase._id];
-                           const isAccepted = status === 'AC';
-                           const isWrong = status === 'WA';
+                           // Check for test case result in submissionData
+                           // The backend might store results with testcase._id as key
+                           const testResult = evalResult?.details?.[testcase._id] || 
+                                            evalResult?.details?.[`testcase_${index}`] ||
+                                            evalResult?.details?.[index]
                            
-                           // If no specific status found but overall success/fail, might fallback or just show knowns.
-                           // Assuming details contains all keys for now.
-                           if (!status) return null;
-
+                           const isAccepted = testResult === 'AC' || testResult === 'SUCCESS' || testResult === 'PASSED'
+                           const isWrong = testResult === 'WA' || testResult === 'FAILED' || testResult === 'FAIL'
+                           const isPending = !testResult && (status === 'QUEUED' || status === 'PROCESSING')
+                           
                            return (
                              <div 
                                key={testcase._id || index}
-                               className={`border px-4 py-2 rounded-lg flex flex-col items-center min-w-[80px] ${
+                               className={`border px-4 py-2 rounded-lg flex flex-col items-center min-w-[80px] transition-all ${
                                  isAccepted 
                                     ? 'border-green-500/30 bg-green-500/10 text-green-500' 
-                                    : 'border-red-500/30 bg-red-500/10 text-red-500'
+                                    : isWrong
+                                    ? 'border-red-500/30 bg-red-500/10 text-red-500'
+                                    : 'border-gray-700/30 bg-gray-800/10 text-gray-400'
                                }`}
                              >
                                <span className="text-xs text-gray-400 mb-1">Test #{index + 1}</span>
-                               {isAccepted ? <Check size={18} /> : <X size={18} />}
+                               {isAccepted ? (
+                                 <span className="text-green-500 text-xl">✓</span>
+                               ) : isWrong ? (
+                                 <span className="text-red-500 text-xl">✗</span>
+                               ) : isPending ? (
+                                 <Clock size={18} className="text-gray-400 animate-pulse" />
+                               ) : (
+                                 <span className="text-gray-400">—</span>
+                               )}
                              </div>
                            )
                         })}
@@ -418,10 +474,11 @@ export default function ProblemPage({ params }: { params: Promise<{ id: string }
                  </button>
                  <button 
                    onClick={handleSubmit} 
-                   disabled={submitting}
+                  //  disabled={submitting}
                    className="px-6 py-2 rounded bg-white text-black hover:bg-gray-200 font-bold text-sm transition-colors disabled:opacity-50"
                  >
-                   {submitting ? 'Submitting...' : 'Submit'}
+                   {/* {submitting ? 'Submitting...' : 'Submit'} */}
+                   Submit
                  </button>
                </div>
              </div>
@@ -430,35 +487,47 @@ export default function ProblemPage({ params }: { params: Promise<{ id: string }
 
           {/* SUBMISSIONS TAB */}
           <div className={`absolute inset-0 bg-[#000] p-6 overflow-y-auto transition-opacity duration-300 ${activeTab === 'submissions' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
-             <h3 className="text-lg font-bold mb-4">Your Submissions</h3>
-             
-             {loadingSubmissions ? (
-                <div className="text-gray-500 text-sm">Loading...</div>
-             ) : submissions.length === 0 ? (
-                <div className="text-gray-500 text-sm">No submissions yet.</div>
-             ) : (
-                <div className="w-full text-left border-collapse">
-                   <div className="grid grid-cols-4 gap-4 text-xs font-semibold text-gray-500 border-b border-gray-800 pb-2 mb-2">
-                      <div>Result</div>
-                      <div>Tests Passed</div>
-                      <div>Time</div>
-                      <div>Memory</div>
-                   </div>
-                   {submissions.map((sub, i) => {
-                     const isSuccess = sub.status === 'SUCCESS' || sub.status === 'COMPLETED'
-                     return (
-                      <div key={i} className="grid grid-cols-4 gap-4 text-sm py-3 border-b border-gray-900 items-center hover:bg-white/5 rounded px-2 -mx-2 transition-colors">
-                        <div className={`flex items-center gap-2 font-medium ${isSuccess ? 'text-green-500' : 'text-red-500'}`}>
-                           {isSuccess ? <Check size={16}/> : <X size={16}/>}
-                           {isSuccess ? 'Accepted' : 'Wrong Answer'}
-                        </div>
-                        <div className="text-gray-300">4/4</div>
-                        <div className="text-gray-300">0.003s</div>
-                        <div className="text-gray-300">3552 KB</div>
-                      </div>
-                   )})}
+            {loadingSubmissions ? (
+              <div className="text-gray-500 text-sm">Loading…</div>
+            ) : submissions.length === 0 ? (
+              <div className="text-gray-500 text-sm">No submissions yet.</div>
+            ) : (
+              <div>
+                <div className="grid grid-cols-4 text-xs text-gray-400 border-b border-gray-800 pb-2 mb-2">
+                  <div>Result</div>
+                  <div>Tests</div>
+                  <div>Time</div>
+                  <div>Memory</div>
                 </div>
-             )}
+
+                {submissions.map((sub) => {
+                  const normalizedStatus = String(sub.status).toUpperCase()
+                  const submissionData = sub.submissionData || {}
+
+                  const testResults = Object.values(submissionData)
+                  const passedTests = testResults.filter((v: any) => v === 'AC').length
+                  const totalTests = testResults.length
+
+                  const isAccepted =
+                    normalizedStatus === 'COMPLETED' && passedTests === totalTests
+
+                  return (
+                    <div
+                      key={sub._id}
+                      className="grid grid-cols-4 py-3 border-b border-gray-900 text-sm"
+                    >
+                      <div className={isAccepted ? 'text-green-500' : 'text-red-500'}>
+                        {isAccepted ? <Check size={16} /> : <X size={16} />}
+                        {isAccepted ? 'Accepted' : 'Wrong Answer'}
+                      </div>
+                      <div>{passedTests}/{totalTests}</div>
+                      <div>—</div>
+                      <div>—</div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
 
         </div>
